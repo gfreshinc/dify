@@ -153,3 +153,4 @@ flax = "^0.8.4"
 kaleido = "0.2.1"
 vanna = {version = "0.5.5", extras = ["clickhouse", "duckdb", "mysql", "postgres"]}
 python-postmark-inbound = "^1.1.0"
+grpcio = "1.63.0"
