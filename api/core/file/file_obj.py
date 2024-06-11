@@ -108,8 +108,8 @@ class FileVar(BaseModel):
 
             return ImagePromptMessageContent(
                 data=self.data,
-                detail=ImagePromptMessageContent.DETAIL.HIGH
-                if image_config.get("detail") == "high" else ImagePromptMessageContent.DETAIL.LOW
+                detail=ImagePromptMessageContent.DETAIL.LOW
+                if image_config.get("detail") == "low" else ImagePromptMessageContent.DETAIL.HIGH
             )
 
     def _get_data(self, force_url: bool = False) -> Optional[str]:

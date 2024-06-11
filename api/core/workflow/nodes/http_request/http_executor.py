@@ -213,6 +213,23 @@ class HttpExecutor:
                 else:
                     self.body = urlencode(body)
             elif node_data.body.type in ['json', 'raw-text']:
+                # 如果body的params的is_include_sysfiles为True，则将系统文件加入到body中
+                if node_data.body.type == 'json' and self.params and self.params.get('is_include_sysfiles'):
+                    from core.file.file_obj import FileTransferMethod
+                    from core.workflow.entities.node_entities import SystemVariable
+                    
+                    for key in variable_pool.system_variables.keys():
+                        if key.value == SystemVariable.FILES.value:
+                            sysfiles = variable_pool.system_variables[key]
+                            if sysfiles:
+                                for filevar in sysfiles:
+                                    if filevar.transfer_method.value == FileTransferMethod.LOCAL_FILE.value:
+                                        raise ValueError('params: is_include_sysfiles not support local file upload.')
+                                sysfiles = [{"type": filevar.type.value, "transfer_method": filevar.transfer_method.value, "url": filevar.preview_url}
+                                    for filevar in sysfiles]
+                                body_json = json.loads(body_data)
+                                body_json.update({'files': sysfiles})
+                                body_data = json.dumps(body_json)
                 self.body = body_data
             elif node_data.body.type == 'none':
                 self.body = ''
@@ -256,6 +273,25 @@ class HttpExecutor:
             if executor_response.size > MAX_TEXT_SIZE:
                 raise ValueError(
                     f'Text size is too large, max size is {READABLE_MAX_TEXT_SIZE}, but current size is {executor_response.readable_size}.')
+
+        if self.params and self.params.get('is_only_workflow_finished') and 'text/event-stream' in executor_response.headers.get('content-type'):
+            # 获取response.content
+            # print(executor_response.content) 
+            for line in executor_response.content.splitlines():
+                if line.startswith('data:'):
+                    data = line[5:]
+                    try:
+                        data = json.loads(data)
+                        if data.get('event') and 'workflow_finished' in data.get('event'):
+                            outputs = data.get('data', {}).get('outputs', {})
+                            answer = outputs.get('answer')
+                            new_response = httpx.Response(executor_response.status_code, content=f'{answer}', headers=executor_response.headers)
+                            new_response = HttpExecutorResponse(new_response) 
+
+                            print(new_response.content)
+                            return new_response
+                    except Exception as e:
+                        pass
 
         return executor_response
 
@@ -354,7 +390,9 @@ class HttpExecutor:
 
                 if escape_quotes:
                     value = value.replace('"', '\\"')
-
+                    if self.params and self.params.get('is_include_sysfiles') and  '\n' in value:
+                        value = value.replace('\n', '\\n') 
+                    
                 variable_value_mapping[variable_selector.variable] = value
 
             return variable_template_parser.format(variable_value_mapping), variable_selectors
