@@ -81,5 +81,6 @@ pgvecto-rs==0.1.4
 firecrawl-py==0.0.5
 oss2==2.18.5
 pgvector==0.2.5
-google-cloud-aiplatform==1.49.0
+google-cloud-aiplatform==1.54.1
 vanna[postgres,mysql,clickhouse,duckdb]==0.5.5
+grpcio==1.63.0
