@@ -11,7 +11,7 @@ const LogoSite: FC<LogoSiteProps> = ({
   return (
     <img
       src='/logo/logo-site.svg'
-      className={classNames('block w-auto h-8', className)}
+      className={classNames('block w-auto h-6', className)}
       alt='logo'
     />
   )
