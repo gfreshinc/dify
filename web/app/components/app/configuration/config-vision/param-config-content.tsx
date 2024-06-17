@@ -11,7 +11,7 @@ import Tooltip from '@/app/components/base/tooltip'
 import { HelpCircle } from '@/app/components/base/icons/src/vender/line/general'
 
 const MIN = 1
-const MAX = 6
+const MAX = 15
 const ParamConfigContent: FC = () => {
   const { t } = useTranslation()
 
