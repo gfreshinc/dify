@@ -1,8 +1,8 @@
 import logging
 import os
+import traceback
 from collections.abc import Generator
 from typing import IO, Optional, Union, cast
-import traceback
 
 from core.entities.provider_configuration import ProviderConfiguration, ProviderModelBundle
 from core.entities.provider_entities import ModelLoadBalancingConfiguration
