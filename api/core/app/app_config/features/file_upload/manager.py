@@ -51,7 +51,7 @@ class FileUploadConfigManager:
         if config['file_upload']['image']['enabled']:
             number_limits = config['file_upload']['image']['number_limits']
             if number_limits < 1 or number_limits > 15:
-                raise ValueError("number_limits must be in [1, 6]")
+                raise ValueError("number_limits must be in [1, 15]")
 
             if is_vision:
                 detail = config['file_upload']['image']['detail']
