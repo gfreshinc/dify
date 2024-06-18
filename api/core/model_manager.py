@@ -2,6 +2,7 @@ import logging
 import os
 from collections.abc import Generator
 from typing import IO, Optional, Union, cast
+import traceback
 
 from core.entities.provider_configuration import ProviderConfiguration, ProviderModelBundle
 from core.entities.provider_entities import ModelLoadBalancingConfiguration
@@ -320,7 +321,14 @@ class ModelInstance:
                 self.load_balancing_manager.cooldown(lb_config, expire=60)
                 last_exception = e
                 continue
-            except (InvokeAuthorizationError, InvokeConnectionError, InvokeBadRequestError, InvokeServerUnavailableError) as e:
+            except (InvokeBadRequestError) as e:
+                stack_trace_str = traceback.format_exc()
+                if "the server had an error processing your request" in stack_trace_str:
+                    self.load_balancing_manager.cooldown(lb_config, expire=10)
+                    last_exception = e
+                    continue
+                raise e
+            except (InvokeAuthorizationError, InvokeConnectionError) as e:
                 # expire in 10 seconds
                 self.load_balancing_manager.cooldown(lb_config, expire=10)
                 last_exception = e
