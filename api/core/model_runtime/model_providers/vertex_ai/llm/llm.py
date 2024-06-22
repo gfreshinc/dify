@@ -319,8 +319,13 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                         if not message_content.data.startswith("data:"):
                             # fetch image data from url
                             try:
-                                image_content = requests.get(message_content.data).content
+                                response = requests.get(message_content.data)
+                                image_content = response.content
                                 mime_type, _ = mimetypes.guess_type(message_content.data)
+                                if mime_type is None:
+                                    mime_type = response.headers.get('Content-Type')
+                                    if mime_type is None:
+                                        mime_type = 'image/png' 
                                 base64_data = base64.b64encode(image_content).decode('utf-8')
                             except Exception as ex:
                                 raise ValueError(f"Failed to fetch image data from url {message_content.data}, {ex}")
