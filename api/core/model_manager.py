@@ -323,7 +323,7 @@ class ModelInstance:
                 continue
             except (InvokeBadRequestError) as e:
                 stack_trace_str = traceback.format_exc()
-                if "the server had an error processing your request" in stack_trace_str:
+                if "the server had an error processing your request" in stack_trace_str.lower() or "internal server error" in stack_trace_str.lower():
                     self.load_balancing_manager.cooldown(lb_config, expire=10)
                     last_exception = e
                     continue
