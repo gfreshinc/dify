@@ -1,3 +1,4 @@
+import ast
 import json
 import logging
 from copy import deepcopy
@@ -152,6 +153,9 @@ class WorkflowTool(Tool):
                 file = tool_parameters.get(parameter.name)
                 if file:
                     try:
+                        # 如果file是字符串, 则转换为dict
+                        if isinstance(file, str):
+                            file = ast.literal_eval(file)
                         file_var_list = [FileVar(**f) for f in file]
                         for file_var in file_var_list:
                             file_dict = {
