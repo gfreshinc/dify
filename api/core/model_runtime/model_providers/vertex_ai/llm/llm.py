@@ -1,10 +1,12 @@
 import base64
 import json
 import logging
+import mimetypes
 from collections.abc import Generator
 from typing import Optional, Union, cast
 
 import google.api_core.exceptions as exceptions
+import requests
 import vertexai.generative_models as glm
 from anthropic import AnthropicVertex, Stream
 from anthropic.types import (
