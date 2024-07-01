@@ -1,7 +1,10 @@
+import base64
 import logging
 from collections.abc import Generator
 from typing import Optional, Union, cast
+from urllib.parse import urlparse
 
+import requests
 import tiktoken
 from openai import OpenAI, Stream
 from openai.types import Completion
@@ -573,6 +576,16 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
                 'include_usage': True
             }
 
+        # format image file remote_Url to base64_data
+        for prompt_message in prompt_messages:
+            if isinstance(prompt_message, UserPromptMessage):
+                prompt_message = cast(UserPromptMessage, prompt_message)
+                if isinstance(prompt_message.content, list):
+                    for content in prompt_message.content:
+                        if content.type == PromptMessageContentType.IMAGE:
+                            content = cast(ImagePromptMessageContent, content)
+                            content.data = self._get_image_data(content.data)
+
         # clear illegal prompt messages
         prompt_messages = self._clear_illegal_prompt_messages(model, prompt_messages)
 
@@ -1083,3 +1096,37 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
         )
 
         return entity
+    
+    def _get_image_data(self, image_url: str) -> str:
+        """
+        Get image data from remote URL
+
+        :param image_url: image URL
+        :return: image data
+        """
+        try:
+            # check if the image URL is valid
+            if not (self._is_valid_url(image_url)):
+                return image_url
+            response = requests.get(image_url)
+            mime_type = response.headers.get('Content-Type')
+            if mime_type is None:
+                mime_type = 'image/png'
+            response.raise_for_status()
+            image_data = base64.b64encode(response.content).decode('utf-8')
+            image_data = f'data:{mime_type};base64,{image_data}'
+        except Exception as ex:
+            logger.error(f"Failed to get image data from {image_url}: {str(ex)}, return image URL directly.")
+            image_data = image_url
+
+        return image_data
+    
+    def _is_valid_url(self, url: str) -> bool:
+        """
+        Check if the given string is a valid URL using urllib.
+
+        :param url: URL to validate
+        :return: True if the URL is valid, False otherwise
+        """
+        parsed_url = urlparse(url)
+        return bool(parsed_url.scheme) and bool(parsed_url.netloc)
