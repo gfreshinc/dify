@@ -1,6 +1,7 @@
 import base64
 import logging
 from collections.abc import Generator
+from io import BytesIO
 from typing import Optional, Union, cast
 from urllib.parse import urlparse
 
@@ -11,6 +12,7 @@ from openai.types import Completion
 from openai.types.chat import ChatCompletion, ChatCompletionChunk, ChatCompletionMessageToolCall
 from openai.types.chat.chat_completion_chunk import ChoiceDeltaFunctionCall, ChoiceDeltaToolCall
 from openai.types.chat.chat_completion_message import FunctionCall
+from PIL import Image
 
 from core.model_runtime.callbacks.base_callback import Callback
 from core.model_runtime.entities.llm_entities import LLMMode, LLMResult, LLMResultChunk, LLMResultChunkDelta
@@ -1109,11 +1111,16 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
             if not (self._is_valid_url(image_url)):
                 return image_url
             response = requests.get(image_url)
+            response.raise_for_status()
+            
             mime_type = response.headers.get('Content-Type')
             if mime_type is None:
                 mime_type = 'image/png'
-            response.raise_for_status()
-            image_data = base64.b64encode(response.content).decode('utf-8')
+            response_data = response.content
+            image = Image.open(BytesIO(response_data))
+            image.verify()  # 验证图片完整性
+
+            image_data = base64.b64encode(response_data).decode('utf-8')
             image_data = f'data:{mime_type};base64,{image_data}'
         except Exception as ex:
             # logger.error(f"Failed to get image data from {image_url}: {str(ex)}, return image URL directly.")
