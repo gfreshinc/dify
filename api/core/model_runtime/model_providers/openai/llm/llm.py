@@ -1116,7 +1116,8 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
             image_data = base64.b64encode(response.content).decode('utf-8')
             image_data = f'data:{mime_type};base64,{image_data}'
         except Exception as ex:
-            logger.error(f"Failed to get image data from {image_url}: {str(ex)}, return image URL directly.")
+            # logger.error(f"Failed to get image data from {image_url}: {str(ex)}, return image URL directly.")
+            raise ValueError(f'Failed to get image data from {image_url}, {ex}')
             image_data = image_url
 
         return image_data
