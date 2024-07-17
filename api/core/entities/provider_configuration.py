@@ -862,7 +862,7 @@ class ProviderConfiguration(BaseModel):
             for m in models:
                 status = ModelStatus.ACTIVE if credentials else ModelStatus.NO_CONFIGURE
                 load_balancing_enabled = False
-                if m.model_type in model_setting_map and m.model in model_setting_map[m.model_type]:
+                if m.model_type in model_setting_map and any(m.model in model for model in model_setting_map[m.model_type]):
                     model_setting = model_setting_map[m.model_type][m.model]
                     if model_setting.enabled is False:
                         status = ModelStatus.DISABLED

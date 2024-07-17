@@ -29,7 +29,17 @@ parameter_rules:
     required: true
     default: 4096
     min: 1
-    max: 4096
+    max: 8192
+  - name: extra_headers
+    label:
+      zh_Hans: extra_headers
+      en_US: extra_headers
+    type: string
+    help:
+      zh_Hans: 增加额外的请求头, max_tokens最大可以设置为8192.
+      en_US: Add additional request headers, and the maximum max_token can be set to 8192.
+    required: false
+    default: anthropic-beta=max-tokens-3-5-sonnet-2024-07-15
   - name: response_format
     use_template: response_format
 pricing:

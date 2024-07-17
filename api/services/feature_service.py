@@ -64,7 +64,8 @@ class FeatureService:
     @classmethod
     def _fulfill_params_from_env(cls, features: FeatureModel):
         features.can_replace_logo = current_app.config['CAN_REPLACE_LOGO']
-        features.model_load_balancing_enabled = current_app.config['MODEL_LB_ENABLED']
+        # features.model_load_balancing_enabled = current_app.config['MODEL_LB_ENABLED']
+        features.model_load_balancing_enabled = True
 
     @classmethod
     def _fulfill_params_from_billing_api(cls, features: FeatureModel, tenant_id: str):

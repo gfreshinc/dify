@@ -1,6 +1,5 @@
 import logging
 import os
-import traceback
 from collections.abc import Generator
 from typing import IO, Optional, Union, cast
 
@@ -321,13 +320,10 @@ class ModelInstance:
                 self.load_balancing_manager.cooldown(lb_config, expire=60)
                 last_exception = e
                 continue
-            except (InvokeBadRequestError) as e:
-                stack_trace_str = traceback.format_exc()
-                if "the server had an error processing your request" in stack_trace_str.lower() or "internal server error" in stack_trace_str.lower():
-                    self.load_balancing_manager.cooldown(lb_config, expire=10)
-                    last_exception = e
-                    continue
-                raise e
+            # except (InvokeBadRequestError) as e:
+            #     self.load_balancing_manager.cooldown(lb_config, expire=5)
+            #     last_exception = e
+            #     continue
             except (InvokeAuthorizationError, InvokeConnectionError) as e:
                 # expire in 10 seconds
                 self.load_balancing_manager.cooldown(lb_config, expire=10)
@@ -445,6 +441,7 @@ class LBModelManager:
 
         while True:
             current_index = redis_client.incr(cache_key)
+            current_index = cast(int, current_index)
             if current_index >= 10000000:
                 current_index = 1
                 redis_client.set(cache_key, current_index)
@@ -507,7 +504,10 @@ class LBModelManager:
             config.id
         )
 
-        return redis_client.exists(cooldown_cache_key)
+
+        res = redis_client.exists(cooldown_cache_key)
+        res = cast(bool, res)
+        return res
 
     @classmethod
     def get_config_in_cooldown_and_ttl(cls, tenant_id: str,
@@ -536,4 +536,5 @@ class LBModelManager:
         if ttl == -2:
             return False, 0
 
+        ttl = cast(int, ttl)
         return True, ttl

@@ -105,6 +105,16 @@ class AnthropicLargeLanguageModel(LargeLanguageModel):
         if stop:
             extra_model_kwargs['stop_sequences'] = stop
 
+        if 'extra_headers' in model_parameters:
+            extra_headers = {}
+            extra_headers_str = model_parameters.pop('extra_headers')
+            # 按照逗号分隔字符串
+            comm_str = extra_headers_str.split(',')
+            for item in comm_str: 
+                key, value = item.split('=')
+                extra_headers.update({key: value})
+            extra_model_kwargs['extra_headers'] = extra_headers
+        
         if user:
             extra_model_kwargs['metadata'] = completion_create_params.Metadata(user_id=user)
 
@@ -405,7 +415,7 @@ class AnthropicLargeLanguageModel(LargeLanguageModel):
         credentials_kwargs = {
             "api_key": credentials['anthropic_api_key'],
             "timeout": Timeout(315.0, read=300.0, write=10.0, connect=5.0),
-            "max_retries": 1,
+            "max_retries": 10,
         }
 
         if credentials.get('anthropic_api_url'):
