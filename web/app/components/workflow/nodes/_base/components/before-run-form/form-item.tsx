@@ -155,7 +155,7 @@ const FormItem: FC<Props> = ({
                 detail: Resolution.high,
               } as any}
               onFilesChange={files => onChange(files.filter(file => file.progress !== -1).map(fileItem => ({
-                type: 'image',
+                type: (fileItem.file && fileItem.file.type.includes('pdf')) ? 'pdf' : 'image',
                 transfer_method: fileItem.type,
                 url: fileItem.url,
                 upload_file_id: fileItem.fileId,
