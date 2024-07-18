@@ -25,6 +25,7 @@ from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, 
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
+    PdfPromptMessageContent,
     PromptMessage,
     PromptMessageContentType,
     PromptMessageTool,
@@ -487,10 +488,10 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                         history.append(content)
 
         safety_settings={
-            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
         }
 
         google_model = glm.GenerativeModel(
@@ -660,10 +661,43 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                 for c in message.content:
                     if c.type == PromptMessageContentType.TEXT:
                         parts.append(glm.Part.from_text(c.data))
-                    else:
-                        metadata, data = c.data.split(',', 1)
-                        mime_type = metadata.split(';', 1)[0].split(':')[1]
-                        parts.append(glm.Part.from_data(mime_type=mime_type, data=data))
+                    # else:
+                    #     metadata, data = c.data.split(',', 1)
+                    #     mime_type = metadata.split(';', 1)[0].split(':')[1]
+                    #     parts.append(glm.Part.from_data(mime_type=mime_type, data=data))
+                    elif c.type == PromptMessageContentType.IMAGE:
+                        message_content = cast(ImagePromptMessageContent, c)
+                        if message_content.data.startswith("data:"):
+                            metadata, base64_data = c.data.split(',', 1)
+                            mime_type = metadata.split(';', 1)[0].split(':')[1]
+                        else:
+                            # fetch image data from url
+                            try:
+                                response = requests.get(message_content.data)
+                                image_content = response.content
+                                mime_type, _ = mimetypes.guess_type(message_content.data)
+                                if mime_type is None:
+                                    mime_type = response.headers.get('Content-Type')
+                                    if mime_type is None:
+                                        mime_type = 'image/png' 
+                                base64_data = base64.b64encode(image_content).decode('utf-8')
+                            except Exception as ex:
+                                raise ValueError(f"Failed to fetch image data from url {message_content.data}, {ex}")
+                        parts.append(glm.Part.from_data(mime_type=mime_type, data=base64_data)) 
+                    elif c.type == PromptMessageContentType.PDF:
+                        message_content = cast(PdfPromptMessageContent, c) 
+                        mime_type='application/pdf'
+                        if message_content.data.startswith("data:"):
+                            metadata, base64_data = c.data.split(',', 1)
+                            body = base64.b64decode(base64_data.encode('utf-8'))
+                        else:
+                            try:
+                                response = requests.get(message_content.data)
+                                body = response.content
+                            except Exception as ex:
+                                raise ValueError(f"Failed to fetch pdf data from url {message_content.data}, {ex}")
+                        parts.append(glm.Part.from_data(mime_type=mime_type, data=body))
+
                 glm_content = glm.Content(role="user", parts=parts)
             return glm_content
         elif isinstance(message, AssistantPromptMessage):

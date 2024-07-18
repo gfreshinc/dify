@@ -556,7 +556,7 @@ class LLMNode(BaseNode):
             if not isinstance(prompt_message.content, str):
                 prompt_message_content = []
                 for content_item in prompt_message.content:
-                    if vision_enabled and content_item.type == PromptMessageContentType.IMAGE:
+                    if vision_enabled and (content_item.type == PromptMessageContentType.IMAGE or content_item.type == PromptMessageContentType.PDF):
                         prompt_message_content.append(content_item)
                     elif content_item.type == PromptMessageContentType.TEXT:
                         prompt_message_content.append(content_item)

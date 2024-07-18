@@ -385,6 +385,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                                 raise ValueError(f"Failed to fetch image data from url {message_content.data}, {ex}")
                         blob = {"inline_data":{"mime_type":mime_type,"data":base64_data}}
                         glm_content['parts'].append(blob)
+                    elif c.type == PromptMessageContentType.PDF:
+                        raise ValueError(f"Unsupported file type {c.type}, "
+                                    f"now only support image/jpeg, image/png, image/gif, and image/webp")  
 
             return glm_content
         elif isinstance(message, AssistantPromptMessage):

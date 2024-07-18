@@ -51,7 +51,7 @@ class MessageFileParser:
         # validate files
         new_files = []
         for file_type, file_objs in type_file_objs.items():
-            if file_type == FileType.IMAGE:
+            if file_type == FileType.IMAGE or file_type == FileType.PDF:
                 # parse and validate files
                 image_config = file_extra_config.image_config
 
@@ -69,7 +69,7 @@ class MessageFileParser:
                         raise ValueError(f'Invalid transfer method: {file_obj.transfer_method.value}')
 
                     # Validate file type
-                    if file_obj.type != FileType.IMAGE:
+                    if file_obj.type != FileType.IMAGE and file_obj.type != FileType.PDF:
                         raise ValueError(f'Invalid file type: {file_obj.type}')
 
                     if file_obj.transfer_method == FileTransferMethod.REMOTE_URL:
@@ -122,7 +122,8 @@ class MessageFileParser:
         """
         type_file_objs: dict[FileType, list[FileVar]] = {
             # Currently only support image
-            FileType.IMAGE: []
+            FileType.IMAGE: [],
+            FileType.PDF: []
         }
 
         if not files:

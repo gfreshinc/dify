@@ -491,6 +491,9 @@ class AnthropicLargeLanguageModel(LargeLanguageModel):
                                     }
                                 }
                                 sub_messages.append(sub_message_dict)
+                            elif message_content.type == PromptMessageContentType.PDF:
+                                raise ValueError(f"Unsupported file type {message_content.type}, "
+                                    f"now only support image/jpeg, image/png, image/gif, and image/webp") 
                         prompt_message_dicts.append({"role": "user", "content": sub_messages})
                 elif isinstance(message, AssistantPromptMessage):
                     message = cast(AssistantPromptMessage, message)
@@ -554,6 +557,8 @@ class AnthropicLargeLanguageModel(LargeLanguageModel):
                         message_text += f"{human_prompt} {sub_message.data}"
                     elif sub_message.type == PromptMessageContentType.IMAGE:
                         message_text += f"{human_prompt} [IMAGE]"
+                    elif sub_message.type == PromptMessageContentType.PDF:
+                        message_text += f"{human_prompt} [PDF]"
         elif isinstance(message, AssistantPromptMessage):
             if not isinstance(message.content, list):
                 message_text = f"{ai_prompt} {content}"
@@ -564,6 +569,8 @@ class AnthropicLargeLanguageModel(LargeLanguageModel):
                         message_text += f"{ai_prompt} {sub_message.data}"
                     elif sub_message.type == PromptMessageContentType.IMAGE:
                         message_text += f"{ai_prompt} [IMAGE]"
+                    elif sub_message.type == PromptMessageContentType.PDF:
+                        message_text += f"{human_prompt} [PDF]"
         elif isinstance(message, SystemPromptMessage):
             message_text = content
         elif isinstance(message, ToolPromptMessage):

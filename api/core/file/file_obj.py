@@ -6,13 +6,18 @@ from pydantic import BaseModel
 from core.app.app_config.entities import FileExtraConfig
 from core.file.tool_file_parser import ToolFileParser
 from core.file.upload_file_parser import UploadFileParser
-from core.model_runtime.entities.message_entities import ImagePromptMessageContent
+from core.model_runtime.entities.message_entities import (
+    ImagePromptMessageContent,
+    PdfPromptMessageContent,
+    PromptMessageContent,
+)
 from extensions.ext_database import db
 from models.model import UploadFile
 
 
 class FileType(enum.Enum):
     IMAGE = 'image'
+    PDF = 'pdf'
 
     @staticmethod
     def value_of(value):
@@ -102,7 +107,7 @@ class FileVar(BaseModel):
         return self._get_data(force_url=True)
 
     @property
-    def prompt_message_content(self) -> ImagePromptMessageContent:
+    def prompt_message_content(self) -> PromptMessageContent:
         if self.type == FileType.IMAGE:
             image_config = self.extra_config.image_config
 
@@ -111,9 +116,15 @@ class FileVar(BaseModel):
                 detail=ImagePromptMessageContent.DETAIL.LOW
                 if image_config.get("detail") == "low" else ImagePromptMessageContent.DETAIL.HIGH
             )
+        if self.type == FileType.PDF:
+            image_config = self.extra_config.image_config
+
+            return PdfPromptMessageContent(
+                data=self.data,
+            )
 
     def _get_data(self, force_url: bool = False) -> Optional[str]:
-        if self.type == FileType.IMAGE:
+        if self.type == FileType.IMAGE or self.type == FileType.PDF:
             if self.transfer_method == FileTransferMethod.REMOTE_URL:
                 return self.url
             elif self.transfer_method == FileTransferMethod.LOCAL_FILE:

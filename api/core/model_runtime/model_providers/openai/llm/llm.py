@@ -587,6 +587,8 @@ class OpenAILargeLanguageModel(_CommonOpenAI, LargeLanguageModel):
                         if content.type == PromptMessageContentType.IMAGE:
                             content = cast(ImagePromptMessageContent, content)
                             content.data = self._get_image_data(content.data)
+                        if content.type == PromptMessageContentType.PDF:
+                            raise NotImplementedError("PDF is not supported in chat model")
 
         # clear illegal prompt messages
         prompt_messages = self._clear_illegal_prompt_messages(model, prompt_messages)

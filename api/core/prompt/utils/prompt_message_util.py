@@ -3,6 +3,7 @@ from typing import cast
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
+    PdfPromptMessageContent,
     PromptMessage,
     PromptMessageContentType,
     PromptMessageRole,
@@ -52,12 +53,20 @@ class PromptMessageUtil:
                             content = cast(TextPromptMessageContent, content)
                             text += content.data
                         else:
-                            content = cast(ImagePromptMessageContent, content)
-                            files.append({
-                                "type": 'image',
-                                "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:],
-                                "detail": content.detail.value
-                            })
+                            if content.type == PromptMessageContentType.IMAGE:
+                                content = cast(ImagePromptMessageContent, content)
+                                files.append({
+                                    "type": 'image',
+                                    "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:],
+                                    "detail": content.detail.value
+                                })
+                            else:
+                                content = cast(PdfPromptMessageContent, content)
+                                
+                                files.append({
+                                    "type": 'pdf',
+                                    "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:]
+                                })
                 else:
                     text = prompt_message.content
 
@@ -81,12 +90,20 @@ class PromptMessageUtil:
                         content = cast(TextPromptMessageContent, content)
                         text += content.data
                     else:
-                        content = cast(ImagePromptMessageContent, content)
-                        files.append({
-                            "type": 'image',
-                            "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:],
-                            "detail": content.detail.value
-                        })
+                        if content.type == PromptMessageContentType.IMAGE:
+                            content = cast(ImagePromptMessageContent, content)
+                            files.append({
+                                "type": 'image',
+                                "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:],
+                                "detail": content.detail.value
+                            })
+                        else:
+                            content = cast(PdfPromptMessageContent, content)
+                            
+                            files.append({
+                                "type": 'application/pdf',
+                                "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:]
+                            })
             else:
                 text = prompt_message.content
 

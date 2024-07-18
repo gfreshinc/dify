@@ -51,6 +51,7 @@ class PromptMessageContentType(Enum):
     """
     TEXT = 'text'
     IMAGE = 'image'
+    PDF = 'pdf'
 
 
 class PromptMessageContent(BaseModel):
@@ -79,6 +80,8 @@ class ImagePromptMessageContent(PromptMessageContent):
     type: PromptMessageContentType = PromptMessageContentType.IMAGE
     detail: DETAIL = DETAIL.LOW
 
+class PdfPromptMessageContent(PromptMessageContent):
+    type: PromptMessageContentType = PromptMessageContentType.PDF
 
 class PromptMessage(ABC, BaseModel):
     """
