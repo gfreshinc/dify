@@ -320,10 +320,10 @@ class ModelInstance:
                 self.load_balancing_manager.cooldown(lb_config, expire=60)
                 last_exception = e
                 continue
-            # except (InvokeBadRequestError) as e:
-            #     self.load_balancing_manager.cooldown(lb_config, expire=5)
-            #     last_exception = e
-            #     continue
+            except (InvokeBadRequestError) as e:
+                self.load_balancing_manager.cooldown(lb_config, expire=10)
+                last_exception = e
+                continue
             except (InvokeAuthorizationError, InvokeConnectionError) as e:
                 # expire in 10 seconds
                 self.load_balancing_manager.cooldown(lb_config, expire=10)
