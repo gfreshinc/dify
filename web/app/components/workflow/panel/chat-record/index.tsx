@@ -5,6 +5,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { RiCloseLine } from '@remixicon/react'
 import {
   useStore,
   useWorkflowStore,
@@ -13,10 +14,9 @@ import { useWorkflowRun } from '../../hooks'
 import UserInput from './user-input'
 import Chat from '@/app/components/base/chat/chat'
 import type { ChatItem } from '@/app/components/base/chat/types'
-import { fetchConvesationMessages } from '@/service/debug'
+import { fetchConversationMessages } from '@/service/debug'
 import { useStore as useAppStore } from '@/app/components/app/store'
 import Loading from '@/app/components/base/loading'
-import { XClose } from '@/app/components/base/icons/src/vender/line/general'
 
 const ChatRecord = () => {
   const [fetched, setFetched] = useState(false)
@@ -51,11 +51,11 @@ const ChatRecord = () => {
     return res
   }, [chatList])
 
-  const handleFetchConvesationMessages = useCallback(async () => {
+  const handleFetchConversationMessages = useCallback(async () => {
     if (appDetail && currentConversationID) {
       try {
         setFetched(false)
-        const res = await fetchConvesationMessages(appDetail.id, currentConversationID)
+        const res = await fetchConversationMessages(appDetail.id, currentConversationID)
         setFetched(true)
         setChatList((res as any).data)
       }
@@ -65,8 +65,8 @@ const ChatRecord = () => {
     }
   }, [appDetail, currentConversationID])
   useEffect(() => {
-    handleFetchConvesationMessages()
-  }, [currentConversationID, appDetail, handleFetchConvesationMessages])
+    handleFetchConversationMessages()
+  }, [currentConversationID, appDetail, handleFetchConversationMessages])
 
   return (
     <div
@@ -93,7 +93,7 @@ const ChatRecord = () => {
                 workflowStore.setState({ historyWorkflowData: undefined })
               }}
             >
-              <XClose className='w-4 h-4 text-gray-500' />
+              <RiCloseLine className='w-4 h-4 text-gray-500' />
             </div>
           </div>
           <div className='grow h-0'>
@@ -103,9 +103,9 @@ const ChatRecord = () => {
               } as any}
               chatList={chatMessageList}
               chatContainerClassName='px-4'
-              chatContainerInnerClassName='pt-6'
+              chatContainerInnerClassName='pt-6 w-full max-w-full mx-auto'
               chatFooterClassName='px-4 rounded-b-2xl'
-              chatFooterInnerClassName='pb-4'
+              chatFooterInnerClassName='pb-4 w-full max-w-full mx-auto'
               chatNode={<UserInput />}
               noChatInput
               allToolIcons={{}}

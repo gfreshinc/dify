@@ -6,10 +6,10 @@ from collections.abc import Generator
 from typing import Optional, Union, cast
 
 import google.ai.generativelanguage as glm
-import google.api_core.exceptions as exceptions
 import google.generativeai as genai
-import google.generativeai.client as client
 import requests
+from google.api_core import exceptions
+from google.generativeai import client
 from google.generativeai.types import ContentType, GenerateContentResponse, HarmBlockThreshold, HarmCategory
 from google.generativeai.types.content_types import to_part
 
@@ -44,16 +44,21 @@ if you are not sure about the structure.
 <instructions>
 {{instructions}}
 </instructions>
-"""
+"""  # noqa: E501
 
 
 class GoogleLargeLanguageModel(LargeLanguageModel):
-
-    def _invoke(self, model: str, credentials: dict,
-                prompt_messages: list[PromptMessage], model_parameters: dict,
-                tools: Optional[list[PromptMessageTool]] = None, stop: Optional[list[str]] = None,
-                stream: bool = True, user: Optional[str] = None) \
-            -> Union[LLMResult, Generator]:
+    def _invoke(
+        self,
+        model: str,
+        credentials: dict,
+        prompt_messages: list[PromptMessage],
+        model_parameters: dict,
+        tools: Optional[list[PromptMessageTool]] = None,
+        stop: Optional[list[str]] = None,
+        stream: bool = True,
+        user: Optional[str] = None,
+    ) -> Union[LLMResult, Generator]:
         """
         Invoke large language model
 
@@ -69,9 +74,14 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         """
         # invoke model
         return self._generate(model, credentials, prompt_messages, model_parameters, tools, stop, stream, user)
-    
-    def get_num_tokens(self, model: str, credentials: dict, prompt_messages: list[PromptMessage],
-                       tools: Optional[list[PromptMessageTool]] = None) -> int:
+
+    def get_num_tokens(
+        self,
+        model: str,
+        credentials: dict,
+        prompt_messages: list[PromptMessage],
+        tools: Optional[list[PromptMessageTool]] = None,
+    ) -> int:
         """
         Get number of tokens for given prompt messages
 
@@ -84,7 +94,7 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         prompt = self._convert_messages_to_prompt(prompt_messages)
 
         return self._get_num_tokens_by_gpt2(prompt)
-    
+
     def _convert_messages_to_prompt(self, messages: list[PromptMessage]) -> str:
         """
         Format a list of messages into a full prompt for the Google model
@@ -94,13 +104,10 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         """
         messages = messages.copy()  # don't mutate the original list
 
-        text = "".join(
-            self._convert_one_message_to_text(message)
-            for message in messages
-        )
+        text = "".join(self._convert_one_message_to_text(message) for message in messages)
 
         return text.rstrip()
-    
+
     def _convert_tools_to_glm_tool(self, tools: list[PromptMessageTool]) -> glm.Tool:
         """
         Convert tool messages to glm tools
@@ -116,14 +123,16 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                         type=glm.Type.OBJECT,
                         properties={
                             key: {
-                                'type_': value.get('type', 'string').upper(),
-                                'description': value.get('description', ''),
-                                'enum': value.get('enum', [])
-                            } for key, value in tool.parameters.get('properties', {}).items()
+                                "type_": value.get("type", "string").upper(),
+                                "description": value.get("description", ""),
+                                "enum": value.get("enum", []),
+                            }
+                            for key, value in tool.parameters.get("properties", {}).items()
                         },
-                        required=tool.parameters.get('required', [])
+                        required=tool.parameters.get("required", []),
                     ),
-                ) for tool in tools
+                )
+                for tool in tools
             ]
         )
 
@@ -135,20 +144,25 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         :param credentials: model credentials
         :return:
         """
-        
+
         try:
             ping_message = SystemPromptMessage(content="ping")
             self._generate(model, credentials, [ping_message], {"max_tokens_to_sample": 5})
-            
+
         except Exception as ex:
             raise CredentialsValidateFailedError(str(ex))
-            
 
-    def _generate(self, model: str, credentials: dict,
-                  prompt_messages: list[PromptMessage], model_parameters: dict,
-                  tools: Optional[list[PromptMessageTool]] = None, stop: Optional[list[str]] = None, 
-                  stream: bool = True, user: Optional[str] = None
-        ) -> Union[LLMResult, Generator]:
+    def _generate(
+        self,
+        model: str,
+        credentials: dict,
+        prompt_messages: list[PromptMessage],
+        model_parameters: dict,
+        tools: Optional[list[PromptMessageTool]] = None,
+        stop: Optional[list[str]] = None,
+        stream: bool = True,
+        user: Optional[str] = None,
+    ) -> Union[LLMResult, Generator]:
         """
         Invoke large language model
 
@@ -162,14 +176,12 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         :return: full response or stream response chunk generator result
         """
         config_kwargs = model_parameters.copy()
-        config_kwargs['max_output_tokens'] = config_kwargs.pop('max_tokens_to_sample', None)
+        config_kwargs["max_output_tokens"] = config_kwargs.pop("max_tokens_to_sample", None)
 
         if stop:
             config_kwargs["stop_sequences"] = stop
 
-        google_model = genai.GenerativeModel(
-            model_name=model
-        )
+        google_model = genai.GenerativeModel(model_name=model)
 
         history = []
 
@@ -179,7 +191,7 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
             content = self._format_message_to_glm_content(last_msg)
             history.append(content)
         else:
-            for msg in prompt_messages:     # makes message roles strictly alternating
+            for msg in prompt_messages:  # makes message roles strictly alternating
                 content = self._format_message_to_glm_content(msg)
                 if history and history[-1]["role"] == content["role"]:
                     history[-1]["parts"].extend(content["parts"])
@@ -193,7 +205,7 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
 
         google_model._client = new_custom_client
 
-        safety_settings={
+        safety_settings = {
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
@@ -202,13 +214,11 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
 
         response = google_model.generate_content(
             contents=history,
-            generation_config=genai.types.GenerationConfig(
-                **config_kwargs
-            ),
+            generation_config=genai.types.GenerationConfig(**config_kwargs),
             stream=stream,
             safety_settings=safety_settings,
             tools=self._convert_tools_to_glm_tool(tools) if tools else None,
-            request_options={"timeout": 600}
+            request_options={"timeout": 600},
         )
 
         if stream:
@@ -216,8 +226,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
 
         return self._handle_generate_response(model, credentials, response, prompt_messages)
 
-    def _handle_generate_response(self, model: str, credentials: dict, response: GenerateContentResponse,
-                                  prompt_messages: list[PromptMessage]) -> LLMResult:
+    def _handle_generate_response(
+        self, model: str, credentials: dict, response: GenerateContentResponse, prompt_messages: list[PromptMessage]
+    ) -> LLMResult:
         """
         Handle llm response
 
@@ -228,9 +239,7 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         :return: llm response
         """
         # transform assistant message to prompt message
-        assistant_prompt_message = AssistantPromptMessage(
-            content=response.text
-        )
+        assistant_prompt_message = AssistantPromptMessage(content=response.text)
 
         # calculate num tokens
         prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
@@ -249,8 +258,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
 
         return result
 
-    def _handle_generate_stream_response(self, model: str, credentials: dict, response: GenerateContentResponse,
-                                         prompt_messages: list[PromptMessage]) -> Generator:
+    def _handle_generate_stream_response(
+        self, model: str, credentials: dict, response: GenerateContentResponse, prompt_messages: list[PromptMessage]
+    ) -> Generator:
         """
         Handle llm stream response
 
@@ -263,9 +273,7 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         index = -1
         for chunk in response:
             for part in chunk.parts:
-                assistant_prompt_message = AssistantPromptMessage(
-                    content=''
-                )
+                assistant_prompt_message = AssistantPromptMessage(content="")
 
                 if part.text:
                     assistant_prompt_message.content += part.text
@@ -274,39 +282,31 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                     assistant_prompt_message.tool_calls = [
                         AssistantPromptMessage.ToolCall(
                             id=part.function_call.name,
-                            type='function',
+                            type="function",
                             function=AssistantPromptMessage.ToolCall.ToolCallFunction(
                                 name=part.function_call.name,
-                                arguments=json.dumps({
-                                    key: value 
-                                    for key, value in part.function_call.args.items()
-                                })
-                            )
+                                arguments=json.dumps(dict(part.function_call.args.items())),
+                            ),
                         )
                     ]
 
                 index += 1
-    
+
                 if not response._done:
-                    
                     # transform assistant message to prompt message
                     yield LLMResultChunk(
                         model=model,
                         prompt_messages=prompt_messages,
-                        delta=LLMResultChunkDelta(
-                            index=index,
-                            message=assistant_prompt_message
-                        )
+                        delta=LLMResultChunkDelta(index=index, message=assistant_prompt_message),
                     )
                 else:
-                    
                     # calculate num tokens
                     prompt_tokens = self.get_num_tokens(model, credentials, prompt_messages)
                     completion_tokens = self.get_num_tokens(model, credentials, [assistant_prompt_message])
 
                     # transform usage
                     usage = self._calc_response_usage(model, credentials, prompt_tokens, completion_tokens)
-                    
+
                     yield LLMResultChunk(
                         model=model,
                         prompt_messages=prompt_messages,
@@ -314,8 +314,8 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                             index=index,
                             message=assistant_prompt_message,
                             finish_reason=str(chunk.candidates[0].finish_reason),
-                            usage=usage
-                        )
+                            usage=usage,
+                        ),
                     )
 
     def _convert_one_message_to_text(self, message: PromptMessage) -> str:
@@ -330,17 +330,13 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
 
         content = message.content
         if isinstance(content, list):
-            content = "".join(
-                c.data for c in content if c.type != PromptMessageContentType.IMAGE
-            )
+            content = "".join(c.data for c in content if c.type != PromptMessageContentType.IMAGE)
 
         if isinstance(message, UserPromptMessage):
             message_text = f"{human_prompt} {content}"
         elif isinstance(message, AssistantPromptMessage):
             message_text = f"{ai_prompt} {content}"
-        elif isinstance(message, SystemPromptMessage):
-            message_text = f"{human_prompt} {content}"
-        elif isinstance(message, ToolPromptMessage):
+        elif isinstance(message, SystemPromptMessage | ToolPromptMessage):
             message_text = f"{human_prompt} {content}"
         else:
             raise ValueError(f"Got unknown type {message}")
@@ -355,12 +351,9 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
         :return: glm Content representation of message
         """
         if isinstance(message, UserPromptMessage):
-            glm_content = {
-                "role": "user",
-                "parts": []
-            }
-            if (isinstance(message.content, str)):
-                glm_content['parts'].append(to_part(message.content))
+            glm_content = {"role": "user", "parts": []}
+            if isinstance(message.content, str):
+                glm_content["parts"].append(to_part(message.content))
             else:
                 for c in message.content:
                     if c.type == PromptMessageContentType.TEXT:
@@ -383,7 +376,7 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                                 base64_data = base64.b64encode(image_content).decode('utf-8')
                             except Exception as ex:
                                 raise ValueError(f"Failed to fetch image data from url {message_content.data}, {ex}")
-                        blob = {"inline_data":{"mime_type":mime_type,"data":base64_data}}
+                        blob = {"inline_data": {"mime_type": mime_type, "data": base64_data}}
                         glm_content['parts'].append(blob)
                     elif c.type == PromptMessageContentType.PDF:
                         raise ValueError(f"Unsupported file type {c.type}, "
@@ -391,66 +384,60 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
 
             return glm_content
         elif isinstance(message, AssistantPromptMessage):
-            glm_content = {
-                "role": "model",
-                "parts": []
-            }
+            glm_content = {"role": "model", "parts": []}
             if message.content:
-                glm_content['parts'].append(to_part(message.content))
+                glm_content["parts"].append(to_part(message.content))
             if message.tool_calls:
-                glm_content["parts"].append(to_part(glm.FunctionCall(
-                    name=message.tool_calls[0].function.name,
-                    args=json.loads(message.tool_calls[0].function.arguments),
-                )))
+                glm_content["parts"].append(
+                    to_part(
+                        glm.FunctionCall(
+                            name=message.tool_calls[0].function.name,
+                            args=json.loads(message.tool_calls[0].function.arguments),
+                        )
+                    )
+                )
             return glm_content
         elif isinstance(message, SystemPromptMessage):
-            return {
-                "role": "user",
-                "parts": [to_part(message.content)]
-            }
+            return {"role": "user", "parts": [to_part(message.content)]}
         elif isinstance(message, ToolPromptMessage):
             return {
                 "role": "function",
-                "parts": [glm.Part(function_response=glm.FunctionResponse(
-                    name=message.name,
-                    response={
-                        "response": message.content
-                    }
-                ))]
+                "parts": [
+                    glm.Part(
+                        function_response=glm.FunctionResponse(
+                            name=message.name, response={"response": message.content}
+                        )
+                    )
+                ],
             }
         else:
             raise ValueError(f"Got unknown type {message}")
-    
+
     @property
     def _invoke_error_mapping(self) -> dict[type[InvokeError], list[type[Exception]]]:
         """
         Map model invoke error to unified error
-        The key is the ermd = genai.GenerativeModel(model)ror type thrown to the caller
-        The value is the md = genai.GenerativeModel(model)error type thrown by the model,
+        The key is the ermd = genai.GenerativeModel(model) error type thrown to the caller
+        The value is the md = genai.GenerativeModel(model) error type thrown by the model,
         which needs to be converted into a unified error type for the caller.
 
-        :return: Invoke emd = genai.GenerativeModel(model)rror mapping
+        :return: Invoke emd = genai.GenerativeModel(model) error mapping
         """
         return {
-            InvokeConnectionError: [
-                exceptions.RetryError
-            ],
+            InvokeConnectionError: [exceptions.RetryError],
             InvokeServerUnavailableError: [
                 exceptions.ServiceUnavailable,
                 exceptions.InternalServerError,
                 exceptions.BadGateway,
                 exceptions.GatewayTimeout,
-                exceptions.DeadlineExceeded
+                exceptions.DeadlineExceeded,
             ],
-            InvokeRateLimitError: [
-                exceptions.ResourceExhausted,
-                exceptions.TooManyRequests
-            ],
+            InvokeRateLimitError: [exceptions.ResourceExhausted, exceptions.TooManyRequests],
             InvokeAuthorizationError: [
                 exceptions.Unauthenticated,
                 exceptions.PermissionDenied,
                 exceptions.Unauthenticated,
-                exceptions.Forbidden
+                exceptions.Forbidden,
             ],
             InvokeBadRequestError: [
                 exceptions.BadRequest,
@@ -466,5 +453,5 @@ class GoogleLargeLanguageModel(LargeLanguageModel):
                 exceptions.PreconditionFailed,
                 exceptions.RequestRangeNotSatisfiable,
                 exceptions.Cancelled,
-            ]
+            ],
         }

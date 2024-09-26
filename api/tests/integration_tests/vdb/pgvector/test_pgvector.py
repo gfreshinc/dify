@@ -7,7 +7,7 @@ from tests.integration_tests.vdb.test_vector_store import (
 )
 
 
-class TestPGVector(AbstractVectorTest):
+class PGVectorTest(AbstractVectorTest):
     def __init__(self):
         super().__init__()
         self.vector = PGVector(
@@ -21,10 +21,6 @@ class TestPGVector(AbstractVectorTest):
             ),
         )
 
-    def search_by_full_text(self):
-        hits_by_full_text: list[Document] = self.vector.search_by_full_text(query=get_example_text())
-        assert len(hits_by_full_text) == 0
-
 
 def test_pgvector(setup_mock_redis):
-    TestPGVector().run_all_tests()
+    PGVectorTest().run_all_tests()
