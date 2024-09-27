@@ -38,7 +38,7 @@ class MessageFileParser:
             if file.get('transfer_method') == FileTransferMethod.REMOTE_URL.value:
                 if not file.get('url'):
                     raise ValueError('Missing file url')
-                if not file.get('url').startswith('http') or not file.get('url').startswith('gcs'):
+                if not file.get('url').startswith('http') and not file.get('url').startswith('gs'):
                     raise ValueError('Invalid file url')
             if file.get('transfer_method') == FileTransferMethod.LOCAL_FILE.value and not file.get('upload_file_id'):
                 raise ValueError('Missing file upload_file_id')
@@ -186,6 +186,8 @@ class MessageFileParser:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             }
 
+            if url.startswith('gs'):
+                return True, ""
             response = requests.head(url, headers=headers, allow_redirects=True)
             if response.status_code == 200:
                 return True, ""
