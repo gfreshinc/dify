@@ -38,7 +38,7 @@ class MessageFileParser:
             if file.get('transfer_method') == FileTransferMethod.REMOTE_URL.value:
                 if not file.get('url'):
                     raise ValueError('Missing file url')
-                if not file.get('url').startswith('http'):
+                if not file.get('url').startswith('http') or not file.get('url').startswith('gcs'):
                     raise ValueError('Invalid file url')
             if file.get('transfer_method') == FileTransferMethod.LOCAL_FILE.value and not file.get('upload_file_id'):
                 raise ValueError('Missing file upload_file_id')
