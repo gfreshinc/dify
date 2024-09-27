@@ -30,22 +30,22 @@ class MessageFileParser:
         """
         for file in files:
             if not isinstance(file, dict):
-                raise ValueError("Invalid file format, must be dict")
-            if not file.get("type"):
-                raise ValueError("Missing file type")
-            FileType.value_of(file.get("type"))
-            if not file.get("transfer_method"):
-                raise ValueError("Missing file transfer method")
-            FileTransferMethod.value_of(file.get("transfer_method"))
-            if file.get("transfer_method") == FileTransferMethod.REMOTE_URL.value:
-                if not file.get("url"):
-                    raise ValueError("Missing file url")
-                if not file.get("url").startswith("http"):
-                    raise ValueError("Invalid file url")
-            if file.get("transfer_method") == FileTransferMethod.LOCAL_FILE.value and not file.get("upload_file_id"):
-                raise ValueError("Missing file upload_file_id")
-            if file.get("transform_method") == FileTransferMethod.TOOL_FILE.value and not file.get("tool_file_id"):
-                raise ValueError("Missing file tool_file_id")
+                raise ValueError('Invalid file format, must be dict')
+            if not file.get('type'):
+                raise ValueError('Missing file type')
+            FileType.value_of(file.get('type'))
+            if not file.get('transfer_method'):
+                raise ValueError('Missing file transfer method')
+            FileTransferMethod.value_of(file.get('transfer_method'))
+            if file.get('transfer_method') == FileTransferMethod.REMOTE_URL.value:
+                if not file.get('url'):
+                    raise ValueError('Missing file url')
+                if not file.get('url').startswith('http') and not file.get('url').startswith('gs'):
+                    raise ValueError('Invalid file url')
+            if file.get('transfer_method') == FileTransferMethod.LOCAL_FILE.value and not file.get('upload_file_id'):
+                raise ValueError('Missing file upload_file_id')
+            if file.get('transform_method') == FileTransferMethod.TOOL_FILE.value and not file.get('tool_file_id'):
+                raise ValueError('Missing file tool_file_id')
 
         # transform files to file objs
         type_file_objs = self._to_file_objs(files, file_extra_config)
@@ -217,6 +217,8 @@ class MessageFileParser:
                 if response.status_code in {200, 304}:
                     return True, ""
 
+            if url.startswith('gs'):
+                return True, ""
             response = requests.head(url, headers=headers, allow_redirects=True)
             if response.status_code in {200, 304}:
                 return True, ""
