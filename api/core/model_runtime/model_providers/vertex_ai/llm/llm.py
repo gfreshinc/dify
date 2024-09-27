@@ -691,7 +691,7 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                         parts.append(glm.Part.from_data(mime_type=mime_type, data=base64_data)) 
                     elif c.type == PromptMessageContentType.PDF:
                         message_content = cast(PdfPromptMessageContent, c) 
-                        mime_type='application/pdf'
+                        mime_type = 'application/pdf'
                         if message_content.data.startswith("gs:"):
                             parts.append(glm.Part.from_uri(mime_type=mime_type, uri=message_content.data))
                         else:
