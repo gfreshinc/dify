@@ -11,6 +11,13 @@ ENV POETRY_VERSION=1.8.3
 
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 
+# Configure Poetry to use aliyun pypi mirror
+RUN poetry config repositories.aliyun https://mirrors.aliyun.com/pypi/simple/ \
+    && poetry config repositories.pypi https://mirrors.aliyun.com/pypi/simple/
+
+# Configure pip to use aliyun pypi mirror
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
 # Configure Poetry
 ENV POETRY_CACHE_DIR=/tmp/poetry_cache
 ENV POETRY_NO_INTERACTION=1
