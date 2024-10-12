@@ -9,14 +9,14 @@ ENV POETRY_VERSION=1.8.3
 # if you located in China, you can use aliyun mirror to speed up
 # RUN pip install --no-cache-dir poetry==${POETRY_VERSION} -i https://mirrors.aliyun.com/pypi/simple/
 
+# Configure pip to use aliyun pypi mirror
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 
 # Configure Poetry to use aliyun pypi mirror
 RUN poetry config repositories.aliyun https://mirrors.aliyun.com/pypi/simple/ \
     && poetry config repositories.pypi https://mirrors.aliyun.com/pypi/simple/
-
-# Configure pip to use aliyun pypi mirror
-RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 
 # Configure Poetry
 ENV POETRY_CACHE_DIR=/tmp/poetry_cache
