@@ -6,6 +6,8 @@ WORKDIR /app/api
 # Install Poetry
 ENV POETRY_VERSION=1.8.3
 
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+
 # if you located in China, you can use aliyun mirror to speed up
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION} -i https://mirrors.aliyun.com/pypi/simple/
 
