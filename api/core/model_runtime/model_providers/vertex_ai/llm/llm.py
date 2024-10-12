@@ -18,7 +18,6 @@ from anthropic.types import (
     MessageStopEvent,
     MessageStreamEvent,
 )
-from api.core.model_runtime.entities.model_entities import PriceType
 from google.api_core import exceptions
 from google.cloud import aiplatform
 from google.oauth2 import service_account
@@ -37,6 +36,7 @@ from core.model_runtime.entities.message_entities import (
     ToolPromptMessage,
     UserPromptMessage,
 )
+from core.model_runtime.entities.model_entities import PriceType
 from core.model_runtime.errors.invoke import (
     InvokeAuthorizationError,
     InvokeBadRequestError,

@@ -56,6 +56,9 @@ class MessageFileParser:
             if file_type in {FileType.IMAGE, FileType.PDF}:
                 # parse and validate files
                 image_config = file_extra_config.image_config
+                
+                if not file_objs:
+                    continue
 
                 # check if image file feature is enabled
                 if not image_config:

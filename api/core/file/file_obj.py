@@ -7,6 +7,7 @@ from core.file.tool_file_parser import ToolFileParser
 from core.file.upload_file_parser import UploadFileParser
 from core.model_runtime.entities.message_entities import (
     ImagePromptMessageContent,
+    PdfPromptMessageContent,
     PromptMessageContent,
 )
 from extensions.ext_database import db
@@ -125,10 +126,17 @@ class FileVar(BaseModel):
                 else ImagePromptMessageContent.DETAIL.LOW,
             )
 
+        if self.type == FileType.PDF:
+            image_config = self.extra_config.image_config
+
+            return PdfPromptMessageContent(
+                data=self.data,
+            )
+
     def _get_data(self, force_url: bool = False) -> Optional[str]:
         from models.model import UploadFile
 
-        if self.type == FileType.IMAGE:
+        if self.type in {FileType.IMAGE, FileType.PDF}:
             if self.transfer_method == FileTransferMethod.REMOTE_URL:
                 return self.url
             elif self.transfer_method == FileTransferMethod.LOCAL_FILE:
