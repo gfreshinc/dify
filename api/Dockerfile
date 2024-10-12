@@ -57,9 +57,10 @@ ENV TZ=UTC
 WORKDIR /app/api
 
 RUN apt-get update \
+    && echo "deb http://mirrors.aliyun.com/debian testing main" > /etc/apt/sources.list \
     && apt-get install -y --no-install-recommends curl nodejs libgmp-dev libmpfr-dev libmpc-dev \
     # if you located in China, you can use aliyun mirror to speed up
-    && echo "deb http://mirrors.aliyun.com/debian testing main" > /etc/apt/sources.list \
+    # && echo "deb http://mirrors.aliyun.com/debian testing main" > /etc/apt/sources.list \
     # && echo "deb http://deb.debian.org/debian testing main" > /etc/apt/sources.list \
     && apt-get update \
     # For Security
