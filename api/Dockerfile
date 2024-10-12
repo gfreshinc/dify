@@ -5,6 +5,9 @@ WORKDIR /app/api
 
 # Install Poetry
 ENV POETRY_VERSION=1.8.3
+ENV PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple/
+ENV POETRY_HTTP_TIMEOUT=500
+ENV PIP_DEFAULT_TIMEOUT=500
 
 RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/
 
