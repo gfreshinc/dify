@@ -11,8 +11,7 @@ ENV POETRY_VERSION=1.8.3
 
 RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 
-RUN poetry config virtualenvs.create false \
-    && poetry config repositories.pypi https://mirrors.aliyun.com/pypi/simple/
+RUN poetry config repositories.pypi.url https://mirrors.aliyun.com/pypi/simple/
 
 # Configure Poetry
 ENV POETRY_CACHE_DIR=/tmp/poetry_cache
