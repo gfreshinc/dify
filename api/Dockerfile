@@ -6,10 +6,10 @@ WORKDIR /app/api
 # Install Poetry
 ENV POETRY_VERSION=1.8.3
 
-RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/
 
 # if you located in China, you can use aliyun mirror to speed up
-RUN pip install --no-cache-dir poetry==${POETRY_VERSION} -i https://mirrors.aliyun.com/pypi/simple/
+RUN pip install --no-cache-dir poetry==${POETRY_VERSION} -i https://pypi.tuna.tsinghua.edu.cn/simple/
 
 # RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
 
@@ -31,8 +31,8 @@ RUN apt-get update \
 # Install Python dependencies
 COPY pyproject.toml poetry.lock ./
 # Configure Poetry to use aliyun pypi mirror
-RUN poetry config repositories.aliyun https://mirrors.aliyun.com/pypi/simple/ \
-    && poetry config repositories.pypi https://mirrors.aliyun.com/pypi/simple/
+RUN poetry config repositories.aliyun https://pypi.tuna.tsinghua.edu.cn/simple/ \
+    && poetry config repositories.pypi https://pypi.tuna.tsinghua.edu.cn/simple/
 RUN poetry install --sync --no-cache --no-root
 
 # production stage
