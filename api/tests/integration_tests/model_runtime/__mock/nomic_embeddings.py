@@ -47,8 +47,8 @@ def mock_nomic(
 MOCK = os.getenv("MOCK_SWITCH", "false").lower() == "true"
 
 
-@pytest.fixture
-def setup_nomic_mock(request, monkeypatch):
+@pytest.fixture()
+def __setup_nomic_mock(request, monkeypatch):
     methods = request.param if hasattr(request, "param") else []
     if MOCK:
         unpatch = mock_nomic(monkeypatch, methods=methods)
