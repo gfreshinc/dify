@@ -29,8 +29,8 @@ RUN apt-get update \
 # Install Python dependencies
 COPY pyproject.toml poetry.lock ./
 # Configure Poetry to use aliyun pypi mirror
-RUN poetry config repositories.aliyun https://pypi.tuna.tsinghua.edu.cn/simple/ \
-    && poetry config repositories.pypi https://pypi.tuna.tsinghua.edu.cn/simple/
+# RUN poetry config repositories.aliyun https://pypi.tuna.tsinghua.edu.cn/simple/ \
+#     && poetry config repositories.pypi https://pypi.tuna.tsinghua.edu.cn/simple/
 RUN poetry install --sync --no-cache --no-root
 
 # production stage
