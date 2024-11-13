@@ -695,16 +695,17 @@ class VertexAiLargeLanguageModel(LargeLanguageModel):
                         if message_content.data.startswith("gs:"):
                             parts.append(glm.Part.from_uri(mime_type=mime_type, uri=message_content.data))
                         else:
-                            if message_content.data.startswith("data:"):
-                                metadata, base64_data = c.data.split(',', 1)
-                                body = base64.b64decode(base64_data.encode('utf-8'))
-                            else:
-                                try:
-                                    response = requests.get(message_content.data)
-                                    body = response.content
-                                except Exception as ex:
-                                    raise ValueError(f"Failed to fetch pdf data from url {message_content.data}, {ex}")
-                            parts.append(glm.Part.from_data(mime_type=mime_type, data=body))
+                            # if message_content.data.startswith("data:"):
+                            #     metadata, base64_data = c.data.split(',', 1)
+                            #     body = base64.b64decode(base64_data.encode('utf-8'))
+                            # else:
+                            #     try:
+                            #         response = requests.get(message_content.data)
+                            #         body = response.content
+                            #     except Exception as ex:
+                            #         raise ValueError(f"Failed to {message_content.data}, {ex}")
+                            # parts.append(glm.Part.from_data(mime_type=mime_type, data=body))
+                            parts.append(glm.Part.from_data(mime_type=mime_type, data=message_content.data))
 
                 glm_content = glm.Content(role="user", parts=parts)
             return glm_content

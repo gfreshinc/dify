@@ -71,11 +71,11 @@ class PromptMessageUtil:
                                         "format": content.format,
                                     }
                                 )
-                            else:
+                            elif isinstance(content, PdfPromptMessageContent):
                                 content = cast(PdfPromptMessageContent, content)
                                 
                                 files.append({
-                                    "type": 'pdf',
+                                    "type": 'application/pdf',
                                     "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:]
                                 })
                 else:
@@ -94,23 +94,30 @@ class PromptMessageUtil:
             if isinstance(prompt_message.content, list):
                 for content in prompt_message.content:
                     if content.type == PromptMessageContentType.TEXT:
-                        content = cast(TextPromptMessageContent, content)
                         text += content.data
-                    else:
-                        if content.type == PromptMessageContentType.IMAGE:
-                            content = cast(ImagePromptMessageContent, content)
-                            files.append({
-                                "type": 'image',
-                                "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:],
-                                "detail": content.detail.value
-                            })
-                        else:
-                            content = cast(PdfPromptMessageContent, content)
-                            
-                            files.append({
-                                "type": 'application/pdf',
-                                "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:]
-                            })
+                    elif isinstance(content, ImagePromptMessageContent):
+                        files.append(
+                            {
+                                "type": "image",
+                                "data": content.data[:10] + "...[TRUNCATED]..." + content.data[-10:],
+                                "detail": content.detail.value,
+                            }
+                        )
+                    elif isinstance(content, AudioPromptMessageContent):
+                        files.append(
+                            {
+                                "type": "audio",
+                                "data": content.data[:10] + "...[TRUNCATED]..." + content.data[-10:],
+                                "format": content.format,
+                            }
+                        )
+                    elif isinstance(content, PdfPromptMessageContent):
+                        content = cast(PdfPromptMessageContent, content)
+                        
+                        files.append({
+                            "type": 'application/pdf',
+                            "data": content.data[:10] + '...[TRUNCATED]...' + content.data[-10:]
+                        })
             else:
                 text = prompt_message.content
 

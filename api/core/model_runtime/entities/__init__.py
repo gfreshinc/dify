@@ -28,6 +28,7 @@ __all__ = [
     "PromptMessageRole",
     "SystemPromptMessage",
     "TextPromptMessageContent",
+    "PdfPromptMessageContent",
     "UserPromptMessage",
     "PromptMessageTool",
     "ToolPromptMessage",

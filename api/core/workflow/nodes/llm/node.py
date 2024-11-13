@@ -11,6 +11,7 @@ from core.model_manager import ModelInstance, ModelManager
 from core.model_runtime.entities import (
     AudioPromptMessageContent,
     ImagePromptMessageContent,
+    PdfPromptMessageContent,
     PromptMessage,
     PromptMessageContentType,
     TextPromptMessageContent,
@@ -547,13 +548,18 @@ class LLMNode(BaseNode[LLMNodeData]):
                     # Skip image if vision is disabled
                     if not vision_enabled and content_item.type == PromptMessageContentType.IMAGE:
                         continue
+                    if not vision_enabled and content_item.type == PromptMessageContentType.PDF:
+                        continue
 
                     if isinstance(content_item, ImagePromptMessageContent):
                         # Override vision config if LLM node has vision config,
                         # cuz vision detail is related to the configuration from FileUpload feature.
                         content_item.detail = vision_detail
                         prompt_message_content.append(content_item)
-                    elif isinstance(content_item, TextPromptMessageContent | AudioPromptMessageContent):
+                    elif isinstance(
+                        content_item,
+                        TextPromptMessageContent | AudioPromptMessageContent | PdfPromptMessageContent
+                    ):
                         prompt_message_content.append(content_item)
 
                 if len(prompt_message_content) > 1:
