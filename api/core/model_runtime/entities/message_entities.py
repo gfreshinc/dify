@@ -57,6 +57,7 @@ class PromptMessageContentType(Enum):
     IMAGE = "image"
     AUDIO = "audio"
     PDF = "pdf"
+    VIDEO = "video"
 
 
 class PromptMessageContent(BaseModel):
@@ -74,6 +75,12 @@ class TextPromptMessageContent(PromptMessageContent):
     """
 
     type: PromptMessageContentType = PromptMessageContentType.TEXT
+
+
+class VideoPromptMessageContent(PromptMessageContent):
+    type: PromptMessageContentType = PromptMessageContentType.VIDEO
+    data: str = Field(..., description="Base64 encoded video data")
+    format: str = Field(..., description="Video format")
 
 
 class AudioPromptMessageContent(PromptMessageContent):

@@ -7,8 +7,6 @@ import httpx
 import validators
 
 from constants import HIDDEN_VALUE
-
-# from tasks.external_document_indexing_task import external_document_indexing_task
 from core.helper import ssrf_proxy
 from extensions.ext_database import db
 from models.dataset import (
@@ -70,7 +68,7 @@ class ExternalDatasetService:
 
         endpoint = f"{settings['endpoint']}/retrieval"
         api_key = settings["api_key"]
-        if not validators.url(endpoint):
+        if not validators.url(endpoint, simple_host=True):
             raise ValueError(f"invalid endpoint: {endpoint}")
         try:
             response = httpx.post(endpoint, headers={"Authorization": f"Bearer {api_key}"})
