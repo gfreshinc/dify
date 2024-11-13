@@ -24,6 +24,7 @@ from core.model_runtime.entities.llm_entities import LLMResult, LLMResultChunk, 
 from core.model_runtime.entities.message_entities import (
     AssistantPromptMessage,
     ImagePromptMessageContent,
+    PdfPromptMessageContent,
     PromptMessage,
     PromptMessageContentType,
     PromptMessageTool,
@@ -141,6 +142,9 @@ class AnthropicLargeLanguageModel(LargeLanguageModel):
         if model == "claude-3-5-sonnet-20240620":
             if model_parameters.get("max_tokens") > 4096:
                 extra_headers["anthropic-beta"] = "max-tokens-3-5-sonnet-2024-07-15"
+
+        if model == "claude-3-5-sonnet-20241022":
+            extra_headers["anthropic-beta"] = "pdfs-2024-09-25"
 
         if tools:
             extra_model_kwargs["tools"] = [self._transform_tool_prompt(tool) for tool in tools]
@@ -519,8 +523,16 @@ class AnthropicLargeLanguageModel(LargeLanguageModel):
                                 }
                                 sub_messages.append(sub_message_dict)
                             elif message_content.type == PromptMessageContentType.PDF:
-                                raise ValueError(f"Unsupported file type {message_content.type}, "
-                                    f"now only support image/jpeg, image/png, image/gif, and image/webp") 
+                                message_content = cast(PdfPromptMessageContent, message_content)
+                                sub_message_dict = {
+                                    "type": "document",
+                                    "source": {
+                                        "type": "base64",
+                                        "media_type": "application/pdf",
+                                        "data": message_content.data
+                                    }
+                                }
+                                sub_messages.append(sub_message_dict)
                         prompt_message_dicts.append({"role": "user", "content": sub_messages})
                 elif isinstance(message, AssistantPromptMessage):
                     message = cast(AssistantPromptMessage, message)
