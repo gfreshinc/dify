@@ -431,6 +431,23 @@ class AppModelConfig(db.Model):
         self.dataset_configs = (
             json.dumps(model_config.get("dataset_configs")) if model_config.get("dataset_configs") else None
         )
+        # shawn.wang add
+        if model_config.get("file_upload"):
+            file_upload_config = model_config.get("file_upload")
+            if isinstance(file_upload_config, dict):
+                allowed_extensions = file_upload_config.get("allowed_file_extensions", [])
+                allowed_types = file_upload_config.get("allowed_file_types", [])
+                
+                if ".PDF" not in allowed_extensions:
+                    allowed_extensions.append(".PDF")
+                if "document" not in allowed_types:
+                    allowed_types.append("document")
+                    
+                file_upload_config["allowed_file_extensions"] = allowed_extensions
+                file_upload_config["allowed_file_types"] = allowed_types
+                
+                model_config["file_upload"] = file_upload_config
+            
         self.file_upload = json.dumps(model_config.get("file_upload")) if model_config.get("file_upload") else None
         return self
 
