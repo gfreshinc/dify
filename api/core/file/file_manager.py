@@ -122,7 +122,8 @@ def _download_file_content(path: str, /):
 def _get_encoded_string(f: File, /):
     match f.transfer_method:
         case FileTransferMethod.REMOTE_URL:
-            response = ssrf_proxy.get(f.remote_url, follow_redirects=True)
+            # http超时时间设置30秒
+            response = ssrf_proxy.get(f.remote_url, max_retries=10, follow_redirects=True, timeout=30)
             response.raise_for_status()
             content = response.content
             encoded_string = base64.b64encode(content).decode("utf-8")
