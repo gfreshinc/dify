@@ -103,9 +103,12 @@ class FeatureService:
 
     @classmethod
     def _fulfill_params_from_env(cls, features: FeatureModel):
-        features.can_replace_logo = dify_config.CAN_REPLACE_LOGO
-        features.model_load_balancing_enabled = dify_config.MODEL_LB_ENABLED
-        features.dataset_operator_enabled = dify_config.DATASET_OPERATOR_ENABLED
+        # features.can_replace_logo = dify_config.CAN_REPLACE_LOGO
+        features.can_replace_logo = True
+        # features.model_load_balancing_enabled = dify_config.MODEL_LB_ENABLED
+        features.model_load_balancing_enabled = True
+        # features.dataset_operator_enabled = dify_config.DATASET_OPERATOR_ENABLED
+        features.dataset_operator_enabled = True
 
     @classmethod
     def _fulfill_params_from_billing_api(cls, features: FeatureModel, tenant_id: str):
