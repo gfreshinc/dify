@@ -31,9 +31,12 @@ else
   else
     exec gunicorn \
       --bind "${DIFY_BIND_ADDRESS:-0.0.0.0}:${DIFY_PORT:-5001}" \
-      --workers ${SERVER_WORKER_AMOUNT:-1} \
+      --workers ${SERVER_WORKER_AMOUNT:-4} \
       --worker-class ${SERVER_WORKER_CLASS:-gevent} \
-      --timeout ${GUNICORN_TIMEOUT:-200} \
+      --worker-connections ${WORKER_CONNECTIONS:-2000} \
+      --timeout ${GUNICORN_TIMEOUT:-300} \
+      --max-requests ${MAX_REQUESTS:-1000} \
+      --max-requests-jitter ${MAX_REQUESTS_JITTER:-100} \
       app:app
   fi
 fi
