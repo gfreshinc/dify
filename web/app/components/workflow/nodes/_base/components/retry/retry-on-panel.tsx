@@ -27,8 +27,8 @@ const RetryOnPanel = ({
   }
 
   const handleMaxRetriesChange = (value: number) => {
-    if (value > 10)
-      value = 10
+    if (value > 1000)
+      value = 1000
     else if (value < 1)
       value = 1
     handleRetryConfigChange({
@@ -72,7 +72,7 @@ const RetryOnPanel = ({
                   value={retry_config?.max_retries || 3}
                   onChange={handleMaxRetriesChange}
                   min={1}
-                  max={10}
+                  max={1000}
                 />
                 <Input
                   type='number'
@@ -80,7 +80,7 @@ const RetryOnPanel = ({
                   value={retry_config?.max_retries || 3}
                   onChange={e => handleMaxRetriesChange(e.target.value as any)}
                   min={1}
-                  max={10}
+                  max={1000}
                   unit={t('workflow.nodes.common.retry.times') || ''}
                   className={s.input}
                 />
