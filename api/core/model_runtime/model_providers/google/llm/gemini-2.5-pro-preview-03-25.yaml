@@ -34,18 +34,6 @@ parameter_rules:
     default: 8192
     min: 1
     max: 65536
-  - name: grounding
-    label:
-      en_US: Grounding
-      zh_Hans: 事实核查
-      ja_JP: 事実チェック
-    type: boolean
-    help:
-      en_US: Grounding with Google Search
-      zh_Hans: Google 事实核查
-      ja_JP: Google検索に基づいた応答をします。
-    required: true
-    default: false
   - name: json_schema
     use_template: json_schema
 pricing:
