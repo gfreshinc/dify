@@ -29,6 +29,7 @@ RUN apt-get update \
 # Install Python dependencies
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --sync --no-cache --no-root
+RUN poetry run pip install google-genai~=1.19.0 --no-deps
 
 # production stage
 FROM base AS production
