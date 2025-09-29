@@ -13,7 +13,12 @@ from core.model_runtime.entities.message_entities import PromptMessage, PromptMe
 from core.model_runtime.entities.model_entities import ModelType
 from core.model_runtime.entities.rerank_entities import RerankResult
 from core.model_runtime.entities.text_embedding_entities import TextEmbeddingResult
-from core.model_runtime.errors.invoke import InvokeAuthorizationError, InvokeConnectionError, InvokeRateLimitError
+from core.model_runtime.errors.invoke import (
+    InvokeAuthorizationError,
+    InvokeConnectionError,
+    InvokeRateLimitError,
+    InvokeServerUnavailableError,
+)
 from core.model_runtime.model_providers.__base.large_language_model import LargeLanguageModel
 from core.model_runtime.model_providers.__base.moderation_model import ModerationModel
 from core.model_runtime.model_providers.__base.rerank_model import RerankModel
@@ -352,6 +357,11 @@ class ModelInstance:
                 last_exception = e
                 continue
             except (InvokeAuthorizationError, InvokeConnectionError) as e:
+                # expire in 10 seconds
+                self.load_balancing_manager.cooldown(lb_config, expire=10)
+                last_exception = e
+                continue
+            except InvokeServerUnavailableError as e:
                 # expire in 10 seconds
                 self.load_balancing_manager.cooldown(lb_config, expire=10)
                 last_exception = e
